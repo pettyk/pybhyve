@@ -102,7 +102,7 @@ class Client:
         )
         self._last_poll_programs = now
 
-    async def _refresh_device_history(self, device_id, force_update=False):
+    async def _refresh_device_history(self, device_id, page_num: int = 1, per_page: int = 10, force_update=False):
         now = time.time()
         if force_update:
             _LOGGER.info("Forcing refresh of device history %s", device_id)
@@ -112,7 +112,7 @@ class Client:
         device_history = await self._request(
             "get",
             DEVICE_HISTORY_PATH.format(device_id),
-            params={"t": str(time.time()), "page": str(1), "per-page": str(10),},
+            params={"t": str(time.time()), "page": str(page_num), "per-page": str(per_page),},
         )
 
         self._device_histories.update({device_id: device_history})
@@ -177,9 +177,9 @@ class Client:
                 return device
         return None
 
-    async def get_device_history(self, device_id, force_update=False):
+    async def get_device_history(self, device_id, page_num: int = 1, per_page: int = 10, force_update=False):
         """Get device watering history by id."""
-        await self._refresh_device_history(device_id, force_update=force_update)
+        await self._refresh_device_history(device_id, page_num, per_page, force_update=force_update)
         return self._device_histories.get(device_id)
 
     async def update_program(self, program_id, program):
